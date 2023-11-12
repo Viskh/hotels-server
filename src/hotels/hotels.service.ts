@@ -4,6 +4,7 @@ import { UpdateHotelDto } from './dto/update-hotel.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, ObjectId } from 'mongoose';
 import { Hotel } from './schemas';
+import { HotelsQuery } from './hotels.types';
 
 @Injectable()
 export class HotelsService {
@@ -15,16 +16,24 @@ export class HotelsService {
     return hotel;
   }
 
-  async addMany(createHotelsDto: CreateHotelDto[]): Promise<Hotel[]> {
+  async addMany(createHotelsDto: CreateHotelDto[]) {
     const hotels = await this.hotelModel.insertMany(createHotelsDto);
 
-    return hotels;
+    return { data: hotels };
   }
 
-  async findAll() {
-    const hotels = await this.hotelModel.find();
+  async findAll({ page = 1, limit = 10, ...filter }: HotelsQuery) {
+    const count = await this.hotelModel.countDocuments({}).exec();
+    const pageTotal = Math.floor((count - 1) / limit) + 1;
+    const skip = (page - 1) * limit;
 
-    return hotels;
+    const hotels = await this.hotelModel
+      .find(filter && filter)
+      .limit(limit)
+      .skip(skip)
+      .exec();
+
+    return { data: hotels, pageTotal };
   }
 
   async findOne(id: ObjectId) {

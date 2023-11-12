@@ -6,11 +6,13 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { HotelsService } from './hotels.service';
 import { CreateHotelDto } from './dto/create-hotel.dto';
 import { UpdateHotelDto } from './dto/update-hotel.dto';
 import { ObjectId } from 'mongoose';
+import { HotelsQuery } from './hotels.types';
 
 @Controller('hotels')
 export class HotelsController {
@@ -27,8 +29,8 @@ export class HotelsController {
   }
 
   @Get()
-  findAll() {
-    return this.hotelsService.findAll();
+  findAll(@Query() query: HotelsQuery) {
+    return this.hotelsService.findAll(query);
   }
 
   @Get(':id')
